@@ -19,12 +19,12 @@ final class _$StorageService extends StorageService {
 
   @override
   Future<Response<dynamic>> postStorage(
-    String flexusJWTAccess,
+    String storageJWT,
     Map<String, dynamic> body,
   ) {
     final Uri $url = Uri.parse('/storages');
     final Map<String, String> $headers = {
-      'flexus-jwt': flexusJWTAccess,
+      'storage-jwt': storageJWT,
     };
     final $body = body;
     final Request $request = Request(
@@ -38,10 +38,10 @@ final class _$StorageService extends StorageService {
   }
 
   @override
-  Future<Response<dynamic>> getStorages(String flexusJWTAccess) {
+  Future<Response<dynamic>> getStorages(String storageJWT) {
     final Uri $url = Uri.parse('/storages');
     final Map<String, String> $headers = {
-      'flexus-jwt': flexusJWTAccess,
+      'storage-jwt': storageJWT,
     };
     final Request $request = Request(
       'GET',

@@ -7,13 +7,13 @@ part 'storage_service.chopper.dart';
 abstract class StorageService extends ChopperService {
   @Post()
   Future<Response> postStorage(
-    @Header('flexus-jwt') String flexusJWTAccess,
+    @Header('storage-jwt') String storageJWT,
     @Body() Map<String, dynamic> body,
   );
 
   @Get()
   Future<Response> getStorages(
-    @Header('flexus-jwt') String flexusJWTAccess,
+    @Header('storage-jwt') String storageJWT,
   );
 
   static StorageService create() {

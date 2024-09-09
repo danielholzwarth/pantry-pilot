@@ -7,13 +7,13 @@ part 'item_service.chopper.dart';
 abstract class ItemService extends ChopperService {
   @Post()
   Future<Response> postItem(
-    @Header('flexus-jwt') String flexusJWTAccess,
+    @Header('storage-jwt') String storageJWT,
     @Body() Map<String, dynamic> body,
   );
 
   @Patch(path: '/{itemID}')
   Future<Response> patchItem(
-    @Header('flexus-jwt') String flexusJWTAccess,
+    @Header('storage-jwt') String storageJWT,
     @Path('itemID') int itemID,
     @Body() Map<String, dynamic> body,
   );

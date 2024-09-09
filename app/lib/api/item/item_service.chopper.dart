@@ -19,12 +19,12 @@ final class _$ItemService extends ItemService {
 
   @override
   Future<Response<dynamic>> postItem(
-    String flexusJWTAccess,
+    String storageJWT,
     Map<String, dynamic> body,
   ) {
     final Uri $url = Uri.parse('/items');
     final Map<String, String> $headers = {
-      'flexus-jwt': flexusJWTAccess,
+      'storage-jwt': storageJWT,
     };
     final $body = body;
     final Request $request = Request(
@@ -39,13 +39,13 @@ final class _$ItemService extends ItemService {
 
   @override
   Future<Response<dynamic>> patchItem(
-    String flexusJWTAccess,
+    String storageJWT,
     int itemID,
     Map<String, dynamic> body,
   ) {
     final Uri $url = Uri.parse('/items/${itemID}');
     final Map<String, String> $headers = {
-      'flexus-jwt': flexusJWTAccess,
+      'storage-jwt': storageJWT,
     };
     final $body = body;
     final Request $request = Request(

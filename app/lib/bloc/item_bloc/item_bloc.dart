@@ -1,4 +1,4 @@
-import 'package:app/api/Item/Item_service.dart';
+import 'package:app/api/item/item_service.dart';
 import 'package:app/helper/jwt_helper.dart';
 import 'package:app/models/item.dart';
 import 'package:flutter/material.dart';

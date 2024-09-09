@@ -1,3 +1,4 @@
+import 'package:app/bloc/item_bloc/item_bloc.dart';
 import 'package:app/bloc/storage_bloc/storage_bloc.dart';
 import 'package:app/models/storage.dart';
 import 'package:app/widgets/storage_drawer.dart';
@@ -13,8 +14,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final TextEditingController newPostController = TextEditingController();
   final StorageBloc storageBloc = StorageBloc();
+  final ItemBloc itemBloc = ItemBloc();
+
+  TextEditingController itemNameController = TextEditingController();
+  TextEditingController itemQuantityController = TextEditingController();
+  TextEditingController itemTargetQuantityController = TextEditingController();
+  TextEditingController itemDetailsController = TextEditingController();
+  TextEditingController itemStorageController = TextEditingController();
+  TextEditingController storageNameController = TextEditingController();
+
+  String itemBarCode = "not implemented yet...";
   bool isQRChecked = false;
 
   @override
@@ -104,12 +114,6 @@ class _HomePageState extends State<HomePage> {
         showDialog(
           context: context,
           builder: (BuildContext context) {
-            TextEditingController itemNameController = TextEditingController();
-            TextEditingController itemQuantityController = TextEditingController();
-            TextEditingController itemTargetQuantityController = TextEditingController();
-            TextEditingController itemStorageController = TextEditingController();
-            TextEditingController storageNameController = TextEditingController();
-
             return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return AlertDialog(
@@ -155,7 +159,7 @@ class _HomePageState extends State<HomePage> {
                       ? buildAddItem(
                           itemNameController, itemQuantityController, itemTargetQuantityController, storages, itemStorageController, context)
                       : buildAddStorage(storageNameController),
-                  actions: buildActions(context),
+                  actions: buildActions(context, isSelected[0]),
                 );
               },
             );
@@ -165,7 +169,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  List<Widget> buildActions(BuildContext context) {
+  List<Widget> buildActions(BuildContext context, bool isAddItem) {
     return [
       TextButton(
         child: Text(
@@ -186,6 +190,29 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         onPressed: () {
+          if (isAddItem) {
+            print("Add Item");
+
+            int? quantity = int.tryParse(itemQuantityController.text);
+            if (quantity == null) {
+              print("error with quantity");
+              return;
+            }
+
+            int? targetQuantity = itemTargetQuantityController.text.isNotEmpty ? int.tryParse(itemTargetQuantityController.text) : 0;
+            if (targetQuantity == null) {
+              print("error with targetQuantity");
+              return;
+            }
+
+            itemBloc.add(PostItem(
+              name: itemNameController.text,
+              quantity: quantity,
+            ));
+          } else {
+            print("Add Storage");
+            storageBloc.add(PostStorage(name: storageNameController.text));
+          }
           Navigator.of(context).pop();
         },
       ),
@@ -242,18 +269,24 @@ class _HomePageState extends State<HomePage> {
               SizedBox(
                 width: 180,
                 child: TextField(
-                  controller: nameController,
+                  controller: itemDetailsController,
                   decoration: const InputDecoration(labelText: "Details"),
                 ),
               ),
-              IconButton(
-                  onPressed: () {
-                    setState(() {
-                      isQRChecked = !isQRChecked;
-                    });
-                  },
-                  icon: Icon(Icons.qr_code_scanner)),
-              isQRChecked ? Icon(Icons.check, color: Colors.green) : Icon(Icons.close, color: Colors.red),
+              StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return Row(
+                  children: [
+                    IconButton(
+                        onPressed: () {
+                          setState(() {
+                            isQRChecked = !isQRChecked;
+                          });
+                        },
+                        icon: const Icon(Icons.qr_code_scanner)),
+                    isQRChecked ? const Icon(Icons.check, color: Colors.green) : const Icon(Icons.close, color: Colors.red),
+                  ],
+                );
+              }),
             ],
           ),
           DropdownMenu(
