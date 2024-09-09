@@ -1,5 +1,6 @@
 import 'package:app/bloc/item_bloc/item_bloc.dart';
 import 'package:app/bloc/storage_bloc/storage_bloc.dart';
+import 'package:app/helper/helper.dart';
 import 'package:app/models/storage.dart';
 import 'package:app/widgets/storage_drawer.dart';
 import 'package:app/widgets/storage_list_view.dart';
@@ -24,8 +25,9 @@ class _HomePageState extends State<HomePage> {
   TextEditingController itemStorageController = TextEditingController();
   TextEditingController storageNameController = TextEditingController();
 
-  String itemBarCode = "not implemented yet...";
+  String itemBarcode = "not implemented yet...";
   bool isQRChecked = false;
+  List<Storage> storages = [];
 
   @override
   void initState() {
@@ -66,41 +68,43 @@ class _HomePageState extends State<HomePage> {
   Widget buildContent() {
     return BlocConsumer(
       bloc: storageBloc,
-      listener: (context, state) {},
-      builder: (context, state) {
-        if (state is StoragesLoaded && state.storages.isNotEmpty) {
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                for (Storage storage in state.storages)
-                  Column(
-                    children: [
-                      StorageListView(storage: storage),
-                    ],
-                  )
-              ],
-            ),
-          );
+      listener: (context, state) {
+        if (state is StoragesLoaded) {
+          storages = state.storages;
         }
 
+        if (state is StoragePosted) {
+          storages.add(state.storage);
+        }
+
+        if (state is StorageError) {
+          displayMessageToUser(state.error, context);
+        }
+      },
+      builder: (context, state) {
         if (state is StoragesLoaded && state.storages.isEmpty) {
           return const Center(
             child: Text("No existing Storage"),
           );
         }
 
-        return const Text("error");
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              for (Storage storage in storages)
+                Column(
+                  children: [
+                    StorageListView(storage: storage),
+                  ],
+                )
+            ],
+          ),
+        );
       },
     );
   }
 
   FloatingActionButton buildFloatingActionButton(BuildContext context) {
-    List<DropdownMenuEntry> storages = [
-      const DropdownMenuEntry(value: 1, label: "Kühlschrank"),
-      const DropdownMenuEntry(value: 2, label: "Vorratskammer"),
-      const DropdownMenuEntry(value: 3, label: "Gartenhaus"),
-    ];
-
     List<bool> isSelected = [true, false];
 
     return FloatingActionButton(
@@ -206,8 +210,12 @@ class _HomePageState extends State<HomePage> {
             }
 
             itemBloc.add(PostItem(
+              storageID: 3,
               name: itemNameController.text,
               quantity: quantity,
+              targetQuantity: 1,
+              details: "asd",
+              barCode: "asd",
             ));
           } else {
             print("Add Storage");
@@ -232,7 +240,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget buildAddItem(TextEditingController nameController, TextEditingController actualController, TextEditingController targetController,
-      List<DropdownMenuEntry<dynamic>> storages, TextEditingController storageController, BuildContext context) {
+      List<Storage> storages, TextEditingController storageController, BuildContext context) {
+    List<DropdownMenuEntry> entries = [];
+
+    for (int i = 0; i < storages.length; i++) {
+      entries.add(DropdownMenuEntry(value: i, label: storages[i].name));
+    }
+
     return SizedBox(
       height: 300,
       child: Column(
@@ -290,7 +304,7 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           DropdownMenu(
-            dropdownMenuEntries: storages,
+            dropdownMenuEntries: entries,
             menuHeight: 200,
             width: 250,
             controller: storageController,

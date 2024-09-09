@@ -28,8 +28,8 @@ CREATE TABLE storage (
     id BIGSERIAL NOT NULL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     user_account_id BIGINT NOT NULL REFERENCES user_account(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    updated_at TIMESTAMP NOT NULL,
-    created_at TIMESTAMP NOT NULL
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE item (
@@ -37,9 +37,9 @@ CREATE TABLE item (
     storage_id BIGINT NOT NULL REFERENCES storage(id) ON DELETE CASCADE ON UPDATE CASCADE,
     name VARCHAR(50) NOT NULL,
     quantity DECIMAL NOT NULL,
+    target_quantity DECIMAL,
     details VARCHAR,
-    barCode VARCHAR,
-    target_quantity DECIMAL
+    barCode VARCHAR
 );
 
 CREATE TABLE transaction (

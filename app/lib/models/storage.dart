@@ -24,8 +24,10 @@ class Storage {
   Storage.fromJson(Map<String, dynamic> json)
       : id = json['id'] as int,
         name = json['name'] as String,
-        items = List<Item>.from(json['items'].map((itemsJson) {
-          return Item.fromJson(itemsJson);
-        })),
+        items = json['items'] != null
+            ? List<Item>.from(json['items'].map((itemsJson) {
+                return Item.fromJson(itemsJson);
+              }))
+            : [],
         updatedAt = DateTime.parse(json['updatedAt']);
 }

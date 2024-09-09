@@ -8,19 +8,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (db DB) CreateUserAccount(createUserRequest types.CreateUserRequest) (types.UserAccount, error) {
+func (db DB) PostUserAccount(createUserRequest types.PostUserRequest) (types.PostUserResponse, error) {
 	emailAlreadyExists, err := GetEmailAlreadyExists(db, createUserRequest.Email)
 	if err != nil {
-		return types.UserAccount{}, err
+		return types.PostUserResponse{}, err
 	}
 
 	if emailAlreadyExists {
-		return types.UserAccount{}, errors.New("account with this email already exists")
+		return types.PostUserResponse{}, errors.New("account with this email already exists")
 	}
 
 	tx, err := db.pool.Begin()
 	if err != nil {
-		return types.UserAccount{}, err
+		return types.PostUserResponse{}, err
 	}
 	defer func() {
 		if err != nil {
@@ -33,24 +33,22 @@ func (db DB) CreateUserAccount(createUserRequest types.CreateUserRequest) (types
 	query := `
         INSERT INTO user_account (email, password, created_at)
         VALUES ($1, $2, NOW())
-        RETURNING id, created_at;
+        RETURNING id, email, created_at;
     `
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(createUserRequest.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return types.UserAccount{}, err
+		return types.PostUserResponse{}, err
 	}
 
-	var userAccount types.UserAccount
-	userAccount.Email = createUserRequest.Email
-	userAccount.Password = hashedPassword
+	var postUserResponse types.PostUserResponse
 
-	err = tx.QueryRow(query, createUserRequest.Email, hashedPassword).Scan(&userAccount.Email, &userAccount.CreatedAt)
+	err = tx.QueryRow(query, createUserRequest.Email, hashedPassword).Scan(&postUserResponse.ID, &postUserResponse.Email, &postUserResponse.CreatedAt)
 	if err != nil {
-		return types.UserAccount{}, err
+		return types.PostUserResponse{}, err
 	}
 
-	return userAccount, nil
+	return postUserResponse, nil
 }
 
 func GetEmailAlreadyExists(db DB, email string) (bool, error) {
@@ -69,8 +67,9 @@ func GetEmailAlreadyExists(db DB, email string) (bool, error) {
 	return userCount > 0, nil
 }
 
-func (db DB) LoginUserAccount(loginUserRequest types.LoginUserRequest) (types.UserAccount, error) {
-	var userAccount types.UserAccount
+func (db DB) LoginUserAccount(loginUserRequest types.LoginUserRequest) (types.LoginUserResponse, error) {
+	var loginUserResponse types.LoginUserResponse
+	var hashedPassword []byte
 
 	query := `
         SELECT *
@@ -79,24 +78,24 @@ func (db DB) LoginUserAccount(loginUserRequest types.LoginUserRequest) (types.Us
     `
 
 	err := db.pool.QueryRow(query, loginUserRequest.Email).Scan(
-		&userAccount.ID,
-		&userAccount.Email,
-		&userAccount.Password,
-		&userAccount.CreatedAt,
+		&loginUserResponse.ID,
+		&loginUserResponse.Email,
+		&hashedPassword,
+		&loginUserResponse.CreatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return types.UserAccount{}, errors.New("user not found")
+			return types.LoginUserResponse{}, errors.New("user not found")
 		}
-		return types.UserAccount{}, err
+		return types.LoginUserResponse{}, err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(userAccount.Password), []byte(loginUserRequest.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(loginUserRequest.Password))
 	if err != nil {
-		return types.UserAccount{}, errors.New("incorrect password")
+		return types.LoginUserResponse{}, errors.New("incorrect password")
 	}
 
-	return userAccount, nil
+	return loginUserResponse, nil
 }
 
 func (db DB) ValidatePasswordByID(userAccountID int, password string) error {

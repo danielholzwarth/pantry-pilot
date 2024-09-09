@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"os"
 	"pantry-pilot/internal/types"
 	"time"
 
@@ -37,7 +36,8 @@ func (s service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	jwtKey = []byte(os.Getenv("JWT_KEY"))
+	jwtKey = []byte("secret") //Remove LATER
+	// jwtKey = []byte(os.Getenv("JWT_KEY"))
 	if len(jwtKey) == 0 {
 		log.Fatalf("JWT_KEY is not set in .env file")
 	}

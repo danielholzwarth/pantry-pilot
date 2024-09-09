@@ -10,8 +10,8 @@ import (
 )
 
 type UserAccountStore interface {
-	CreateUserAccount(createUserRequest types.CreateUserRequest) (types.UserAccount, error)
-	LoginUserAccount(loginUserRequest types.LoginUserRequest) (types.UserAccount, error)
+	PostUserAccount(createUserRequest types.PostUserRequest) (types.PostUserResponse, error)
+	LoginUserAccount(loginUserRequest types.LoginUserRequest) (types.LoginUserResponse, error)
 }
 
 type service struct {
@@ -26,7 +26,7 @@ func NewService(userAccountStore UserAccountStore) http.Handler {
 		userAccountStore: userAccountStore,
 	}
 
-	r.Post("/", s.createUserAccount())
+	r.Post("/", s.postUserAccount())
 	r.Get("/login", s.loginUserAccount())
 
 	return s
@@ -36,9 +36,9 @@ func (s service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.handler.ServeHTTP(w, r)
 }
 
-func (s service) createUserAccount() http.HandlerFunc {
+func (s service) postUserAccount() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var requestBody types.CreateUserRequest
+		var requestBody types.PostUserRequest
 
 		decoder := json.NewDecoder(r.Body)
 		if err := decoder.Decode(&requestBody); err != nil {
@@ -58,7 +58,7 @@ func (s service) createUserAccount() http.HandlerFunc {
 			return
 		}
 
-		user, err := s.userAccountStore.CreateUserAccount(requestBody)
+		user, err := s.userAccountStore.PostUserAccount(requestBody)
 		if err != nil {
 			http.Error(w, "Failed to create User", http.StatusInternalServerError)
 			println(err.Error())

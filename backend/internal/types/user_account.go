@@ -9,9 +9,15 @@ type UserAccount struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-type CreateUserRequest struct {
+type PostUserRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type PostUserResponse struct {
+	ID        int       `json:"id"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type LoginUserRequest struct {
@@ -19,13 +25,8 @@ type LoginUserRequest struct {
 	Password string `json:"password"`
 }
 
-// type UserAccountInformation struct {
-// 	UserAccountID          int        `json:"userAccountID"`
-// 	Username               string     `json:"username"`
-// 	Name                   string     `json:"name"`
-// 	CreatedAt              time.Time  `json:"createdAt"`
-// 	Level                  int        `json:"level"`
-// 	ProfilePicture         *[]byte    `json:"profilePicture,omitempty"`
-// 	WorkoutStartTime       *time.Time `json:"workoutStartTime,omitempty"`
-// 	AverageWorkoutDuration *float64   `json:"averageWorkoutDuration,omitempty"`
-// }
+type LoginUserResponse struct {
+	ID        int       `json:"id"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"createdAt"`
+}

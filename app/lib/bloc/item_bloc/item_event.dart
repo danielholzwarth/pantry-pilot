@@ -4,6 +4,7 @@ part of 'item_bloc.dart';
 abstract class ItemEvent {}
 
 class PostItem extends ItemEvent {
+  final int storageID;
   final String name;
   final int quantity;
   final String? details;
@@ -11,6 +12,7 @@ class PostItem extends ItemEvent {
   final int? targetQuantity;
 
   PostItem({
+    required this.storageID,
     required this.name,
     required this.quantity,
     this.details,

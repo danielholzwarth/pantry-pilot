@@ -25,7 +25,12 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
     }
 
     final response = await _itemService.postItem(currentJWT, {
+      "storageID": event.storageID,
       "name": event.name,
+      "quantity": event.quantity,
+      "targetQuantity": event.targetQuantity,
+      "details": event.details,
+      "barcode": event.barCode,
     });
 
     if (!response.isSuccessful) {

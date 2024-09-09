@@ -2,17 +2,17 @@ class Item {
   int id;
   String name;
   int quantity;
+  int? targetQuantity;
   String? details;
   String? barCode;
-  int? targetQuantity;
 
   Item({
     required this.id,
     required this.name,
     required this.quantity,
+    this.targetQuantity,
     this.details,
     this.barCode,
-    this.targetQuantity,
   });
 
   Map<String, dynamic> toJson() {
@@ -20,9 +20,9 @@ class Item {
       'id': id,
       'name': name,
       'quantity': quantity,
+      'targetQuantity': targetQuantity,
       'details': details,
       'barCode': barCode,
-      'targetQuantity': targetQuantity,
     };
   }
 
@@ -30,7 +30,7 @@ class Item {
       : id = json['id'] as int,
         name = json['name'] as String,
         quantity = json['quantity'] as int,
+        targetQuantity = json['targetQuantity'],
         details = json['details'],
-        barCode = json['barCode'],
-        targetQuantity = json['targetQuantity'];
+        barCode = json['barCode'];
 }
