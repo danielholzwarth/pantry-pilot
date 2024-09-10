@@ -2,10 +2,6 @@ BEGIN;
 
 /*
 -- Drop all tables
-DROP TABLE IF EXISTS exercise_type, language, position, user_account, user_list, report, gym, user_account_gym, friendship, user_settings, plan, split, exercise, exercise_split, workout, set, best_lifts CASCADE;
-
-or
-
 DROP SCHEMA IF EXISTS public CASCADE;
 */
 

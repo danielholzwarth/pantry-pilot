@@ -16,6 +16,19 @@ abstract class StorageService extends ChopperService {
     @Header('storage-jwt') String storageJWT,
   );
 
+  @Patch(path: '/{storageID}')
+  Future<Response> patchStorage(
+    @Header('storage-jwt') String storageJWT,
+    @Path('storageID') int itemID,
+    @Body() Map<String, dynamic> body,
+  );
+
+  @Delete(path: '/{storageID}')
+  Future<Response> deleteStorage(
+    @Header('storage-jwt') String storageJWT,
+    @Path('storageID') int itemID,
+  );
+
   static StorageService create() {
     final client = ChopperClient(
         baseUrl: Uri.parse(SettingsHelper.getCurrentURL()),

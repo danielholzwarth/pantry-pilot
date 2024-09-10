@@ -51,4 +51,43 @@ final class _$StorageService extends StorageService {
     );
     return client.send<dynamic, dynamic>($request);
   }
+
+  @override
+  Future<Response<dynamic>> patchStorage(
+    String storageJWT,
+    int itemID,
+    Map<String, dynamic> body,
+  ) {
+    final Uri $url = Uri.parse('/storages/${itemID}');
+    final Map<String, String> $headers = {
+      'storage-jwt': storageJWT,
+    };
+    final $body = body;
+    final Request $request = Request(
+      'PATCH',
+      $url,
+      client.baseUrl,
+      body: $body,
+      headers: $headers,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> deleteStorage(
+    String storageJWT,
+    int itemID,
+  ) {
+    final Uri $url = Uri.parse('/storages/${itemID}');
+    final Map<String, String> $headers = {
+      'storage-jwt': storageJWT,
+    };
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      headers: $headers,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
 }

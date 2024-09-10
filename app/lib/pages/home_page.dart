@@ -83,7 +83,7 @@ class _HomePageState extends State<HomePage> {
               for (Storage storage in storages)
                 Column(
                   children: [
-                    StorageListView(storage: storage),
+                    StorageListView(storage: storage, homeStorageBloc: storageBloc),
                   ],
                 )
             ],

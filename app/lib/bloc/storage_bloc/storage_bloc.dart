@@ -13,6 +13,8 @@ class StorageBloc extends Bloc<StorageEvent, StorageState> {
   StorageBloc() : super(StorageInitial()) {
     on<PostStorage>(_onPostStorage);
     on<GetStorages>(_onGetStorages);
+    on<PatchStorage>(_onPatchStorage);
+    on<DeleteStorage>(_onDeleteStorage);
   }
 
   void _onPostStorage(PostStorage event, Emitter<StorageState> emit) async {
@@ -31,12 +33,8 @@ class StorageBloc extends Bloc<StorageEvent, StorageState> {
       return;
     }
 
-    if (response.body != null) {
-      JWTHelper.saveJWTsFromResponse(response);
-
-      Storage storage = Storage.fromJson(response.body);
-      emit(StoragePosted(storage: storage));
-    }
+    JWTHelper.saveJWTsFromResponse(response);
+    emit(StoragePosted());
   }
 
   void _onGetStorages(GetStorages event, Emitter<StorageState> emit) async {
@@ -67,5 +65,49 @@ class StorageBloc extends Bloc<StorageEvent, StorageState> {
 
       emit(StoragesLoaded(storages: storages));
     }
+  }
+
+  void _onPatchStorage(PatchStorage event, Emitter<StorageState> emit) async {
+    emit(StoragePatching());
+
+    await Future.delayed(Durations.extralong4);
+
+    String? currentJWT = JWTHelper.getActiveJWT();
+    if (currentJWT == null) {
+      debugPrint("No active JWT found!");
+      return;
+    }
+
+    final response = await _storageService.patchStorage(currentJWT, event.storageID, {"name": event.name});
+
+    if (!response.isSuccessful) {
+      emit(StorageError(error: response.error.toString()));
+      return;
+    }
+
+    JWTHelper.saveJWTsFromResponse(response);
+    emit(StoragePatched());
+  }
+
+  void _onDeleteStorage(DeleteStorage event, Emitter<StorageState> emit) async {
+    emit(StorageDeleting());
+
+    await Future.delayed(Durations.extralong4);
+
+    String? currentJWT = JWTHelper.getActiveJWT();
+    if (currentJWT == null) {
+      debugPrint("No active JWT found!");
+      return;
+    }
+
+    final response = await _storageService.deleteStorage(currentJWT, event.storageID);
+
+    if (!response.isSuccessful) {
+      emit(StorageError(error: response.error.toString()));
+      return;
+    }
+
+    JWTHelper.saveJWTsFromResponse(response);
+    emit(StorageDeleted());
   }
 }

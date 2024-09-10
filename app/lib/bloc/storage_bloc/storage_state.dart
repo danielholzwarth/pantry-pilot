@@ -17,13 +17,15 @@ class StoragesLoaded extends StorageState {
 
 class StoragePosting extends StorageState {}
 
-class StoragePosted extends StorageState {
-  final Storage storage;
+class StoragePosted extends StorageState {}
 
-  StoragePosted({
-    required this.storage,
-  });
-}
+class StoragePatching extends StorageState {}
+
+class StoragePatched extends StorageState {}
+
+class StorageDeleting extends StorageState {}
+
+class StorageDeleted extends StorageState {}
 
 class StorageError extends StorageState {
   final String error;
