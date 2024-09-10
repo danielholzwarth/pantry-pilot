@@ -1,4 +1,5 @@
 import 'package:app/models/storage.dart';
+import 'package:app/widgets/dialogs/storage_confirm_delete_dialog.dart';
 import 'package:app/widgets/storage_tile.dart';
 import 'package:flutter/material.dart';
 
@@ -15,13 +16,21 @@ class StorageListView extends StatefulWidget {
 }
 
 class _StorageListViewState extends State<StorageListView> {
-  void onDelete(BuildContext context, int index) {
+  TextEditingController nameController = TextEditingController();
+
+  void onDeleteItem(BuildContext context, int index) {
     setState(() {
       widget.storage.items.remove(widget.storage.items[index]);
     });
   }
 
-  void onEdit(BuildContext context) {}
+  void onEditItem(BuildContext context) {}
+
+  @override
+  void initState() {
+    nameController.text = widget.storage.name;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +40,68 @@ class _StorageListViewState extends State<StorageListView> {
         ExpansionTile(
           iconColor: Theme.of(context).colorScheme.inversePrimary,
           initiallyExpanded: true,
-          title: Text(
-            widget.storage.name,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w500,
+          title: GestureDetector(
+            onLongPress: () => showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: const Text("Edit Storage", textAlign: TextAlign.center),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: nameController,
+                        decoration: const InputDecoration(labelText: "Change Name"),
+                      ),
+                      const SizedBox(height: 20),
+                      GestureDetector(
+                        onTap: () => showDialog(
+                          context: context,
+                          builder: (context) {
+                            return StorageConfirmDeleteDialog(
+                              deleteName: widget.storage.name,
+                              message: "This step is irreversible. All items connected to the storage will be deleted and can not be restored!",
+                              onPressed: () {},
+                            );
+                          },
+                        ),
+                        child: Text(
+                          "Delete Storage",
+                          style: TextStyle(color: Colors.red.shade300),
+                        ),
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          child: Text(
+                            "Cancel",
+                            style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary),
+                          ),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            "Save",
+                            style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
+            child: Text(
+              widget.storage.name,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           children: [
@@ -46,8 +112,8 @@ class _StorageListViewState extends State<StorageListView> {
               itemBuilder: (context, index) {
                 return StorageTile(
                   item: widget.storage.items[index],
-                  onDelete: (p0) => onDelete(context, index),
-                  onEdit: (p0) => onEdit(context),
+                  onDelete: (p0) => onDeleteItem(context, index),
+                  onEdit: (p0) => onEditItem(context),
                 );
               },
             ),

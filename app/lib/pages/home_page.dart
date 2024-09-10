@@ -113,11 +113,13 @@ class _HomePageState extends State<HomePage> {
                   title: ToggleButtons(
                     isSelected: isSelected,
                     onPressed: (int index) {
-                      setState(() {
-                        for (int i = 0; i < isSelected.length; i++) {
-                          isSelected[i] = i == index;
-                        }
-                      });
+                      setState(
+                        () {
+                          for (int i = 0; i < isSelected.length; i++) {
+                            isSelected[i] = i == index;
+                          }
+                        },
+                      );
                     },
                     children: <Widget>[
                       Padding(
