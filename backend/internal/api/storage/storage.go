@@ -58,21 +58,20 @@ func (s service) postStorage() http.HandlerFunc {
 			return
 		}
 
-		storage, err := s.storageStore.PostStorage(requestBody)
+		data, err := s.storageStore.PostStorage(requestBody)
 		if err != nil {
 			http.Error(w, "Failed to create Storage", http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}
 
-		response, err := json.Marshal(storage)
+		response, err := json.Marshal(data)
 		if err != nil {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		w.Write(response)
 	}
@@ -86,22 +85,27 @@ func (s service) getStorages() http.HandlerFunc {
 			return
 		}
 
-		storages, err := s.storageStore.GetStorages(claims.UserAccountID)
+		data, err := s.storageStore.GetStorages(claims.UserAccountID)
 		if err != nil {
 			http.Error(w, "Failed to get Storages", http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}
 
-		response, err := json.Marshal(storages)
+		if data == nil {
+			w.WriteHeader(http.StatusOK)
+			w.Write(nil)
+			return
+		}
+
+		response, err := json.Marshal(data)
 		if err != nil {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
+		w.WriteHeader(http.StatusOK)
 		w.Write(response)
 	}
 }

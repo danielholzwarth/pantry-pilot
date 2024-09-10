@@ -89,7 +89,6 @@ func (s service) postUserAccount() http.HandlerFunc {
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		w.Write(response)
 	}
@@ -139,8 +138,8 @@ func (s service) loginUserAccount() http.HandlerFunc {
 			return
 		}
 
-		w.Header().Add("flexus-jwt-access", jwtAccess)
-		w.Header().Add("flexus-jwt-refresh", jwtRefresh)
+		w.Header().Add("storage-jwt-access", jwtAccess)
+		w.Header().Add("storage-jwt-refresh", jwtRefresh)
 
 		response, err := json.Marshal(user)
 		if err != nil {
@@ -149,7 +148,6 @@ func (s service) loginUserAccount() http.HandlerFunc {
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write(response)
 	}

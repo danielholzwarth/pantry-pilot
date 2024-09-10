@@ -59,7 +59,7 @@ class StorageBloc extends Bloc<StorageEvent, StorageState> {
       JWTHelper.saveJWTsFromResponse(response);
 
       List<Storage> storages = [];
-      if (response.body != "null") {
+      if (response.bodyString.isNotEmpty) {
         storages = List<Storage>.from(response.body.map((json) {
           return Storage.fromJson(json);
         }));

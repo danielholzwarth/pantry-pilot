@@ -1,3 +1,4 @@
+import 'package:app/helper/jwt_helper.dart';
 import 'package:app/widgets/storage_drawer_tile.dart';
 import 'package:flutter/material.dart';
 
@@ -5,6 +6,8 @@ class StorageDrawer extends StatelessWidget {
   const StorageDrawer({super.key});
 
   void logoutUser(BuildContext context) {
+    JWTHelper.deleteJWT();
+    Navigator.pop(context);
     Navigator.pushReplacementNamed(context, "/login_or_register_page");
   }
 
@@ -57,10 +60,7 @@ class StorageDrawer extends StatelessWidget {
             title: "L O G O U T",
             iconData: Icons.logout,
             padding: const EdgeInsets.only(left: 25, bottom: 25),
-            onTap: () {
-              Navigator.pop(context);
-              logoutUser(context);
-            },
+            onTap: () => logoutUser(context),
           ),
         ],
       ),

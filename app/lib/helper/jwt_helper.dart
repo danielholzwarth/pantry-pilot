@@ -3,6 +3,13 @@ import 'package:hive/hive.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class JWTHelper {
+  static void deleteJWT() {
+    Box userBox = Hive.box('userBox');
+
+    userBox.delete("storage-jwt-access");
+    userBox.delete("storage-jwt-refresh");
+  }
+
   static String? getActiveJWT() {
     Box userBox = Hive.box('userBox');
 

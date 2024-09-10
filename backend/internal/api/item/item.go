@@ -64,12 +64,6 @@ func (s service) postItem() http.HandlerFunc {
 			return
 		}
 
-		if requestBody.Quantity <= 0 {
-			http.Error(w, "Wrong input for quantity. Must be integer greater than 0", http.StatusBadRequest)
-			println("Wrong input for quantity. Must be integer greater than 0")
-			return
-		}
-
 		item, err := s.itemStore.PostItem(requestBody)
 		if err != nil {
 			http.Error(w, "Failed to create User", http.StatusInternalServerError)
@@ -84,7 +78,6 @@ func (s service) postItem() http.HandlerFunc {
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		w.Write(response)
 	}
@@ -107,23 +100,13 @@ func (s service) patchItem() http.HandlerFunc {
 			return
 		}
 
-		if requestBody.StorageID >= 0 {
+		if requestBody.StorageID <= 0 {
 			http.Error(w, "Wrong input for storageID. Must be integer greater than 0", http.StatusBadRequest)
 			println("Wrong input for storageID. Must be integer greater than 0")
 			return
 		}
 
-		if requestBody.Name == "" {
-			http.Error(w, "Name must not be empty", http.StatusBadRequest)
-			println("Name must not be empty")
-			return
-		}
-
-		if requestBody.Quantity >= 0 {
-			http.Error(w, "Wrong input for quantity. Must be integer greater than 0", http.StatusBadRequest)
-			println("Wrong input for quantity. Must be integer greater than 0")
-			return
-		}
+		//TODO Get entire object and patch db entry
 
 		item, err := s.itemStore.PatchItem(requestBody)
 		if err != nil {
@@ -139,8 +122,7 @@ func (s service) patchItem() http.HandlerFunc {
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
+		w.WriteHeader(http.StatusOK)
 		w.Write(response)
 	}
 }
