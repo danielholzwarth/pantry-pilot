@@ -81,8 +81,8 @@ func (db DB) GetStorages(userAccountID int) ([]types.Storage, error) {
 		WHERE storage_id = $1;
 	`
 
-	for _, v := range storages {
-		rows, err := db.pool.Query(query, v.ID)
+	for i := range storages {
+		rows, err := db.pool.Query(query, storages[i].ID)
 		if err != nil {
 			return []types.Storage{}, err
 		}
@@ -96,7 +96,7 @@ func (db DB) GetStorages(userAccountID int) ([]types.Storage, error) {
 				return []types.Storage{}, err
 			}
 
-			v.Items = append(v.Items, item)
+			storages[i].Items = append(storages[i].Items, item)
 		}
 	}
 

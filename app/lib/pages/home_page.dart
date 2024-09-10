@@ -70,10 +70,12 @@ class _HomePageState extends State<HomePage> {
       bloc: storageBloc,
       listener: (context, state) {
         if (state is StoragesLoaded) {
+          clearController();
           storages = state.storages;
         }
 
         if (state is StoragePosted) {
+          clearController();
           storages.add(state.storage);
         }
 
@@ -195,36 +197,36 @@ class _HomePageState extends State<HomePage> {
         ),
         onPressed: () {
           if (isAddItem) {
-            print("Add Item");
-
             int? quantity = int.tryParse(itemQuantityController.text);
             if (quantity == null) {
-              print("error with quantity");
-              return;
-            }
-
-            int? targetQuantity = itemTargetQuantityController.text.isNotEmpty ? int.tryParse(itemTargetQuantityController.text) : 0;
-            if (targetQuantity == null) {
-              print("error with targetQuantity");
+              displayMessageToUser("Please enter valid Quantity > 0", context);
               return;
             }
 
             itemBloc.add(PostItem(
-              storageID: 3,
+              storageID: storages.firstWhere((element) => element.name == itemStorageController.text).id,
               name: itemNameController.text,
               quantity: quantity,
-              targetQuantity: 1,
-              details: "asd",
-              barCode: "asd",
+              targetQuantity: int.tryParse(itemTargetQuantityController.text),
+              details: itemDetailsController.text,
+              barCode: itemBarcode, //GET REAL BARCODE
             ));
           } else {
-            print("Add Storage");
             storageBloc.add(PostStorage(name: storageNameController.text));
           }
           Navigator.of(context).pop();
         },
       ),
     ];
+  }
+
+  void clearController() {
+    itemNameController.clear();
+    itemQuantityController.clear();
+    itemTargetQuantityController.clear();
+    itemDetailsController.clear();
+    itemStorageController.clear();
+    storageNameController.clear();
   }
 
   Column buildAddStorage(TextEditingController nameController) {

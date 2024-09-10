@@ -11,7 +11,7 @@ func (db DB) PostItem(request types.PostItemRequest) (types.PostItemResponse, er
 		SELECT EXISTS(
 			SELECT 1 
 			FROM item i
-			JOIN storage s
+			JOIN storage s ON i.storage_id = s.id
 			WHERE i.name = $1 AND i.storage_id = $2 AND s.user_account_id = $3
 		);
 	`
@@ -27,7 +27,6 @@ func (db DB) PostItem(request types.PostItemRequest) (types.PostItemResponse, er
 	}
 
 	//Create Item
-	//TODO CHECK IF STORAGE IS FROM USER
 	var postItemResponse types.PostItemResponse
 
 	query = `
@@ -36,7 +35,7 @@ func (db DB) PostItem(request types.PostItemRequest) (types.PostItemResponse, er
 		RETURNING id, storage_id, name, quantity, target_quantity, details, barcode;
 	`
 
-	err = db.pool.QueryRow(query, request.UserAccountID, request.StorageID, request.Name, request.Quantity, request.TargetQuantity, request.Details, request.Barcode).Scan(
+	err = db.pool.QueryRow(query, request.StorageID, request.Name, request.Quantity, request.TargetQuantity, request.Details, request.Barcode).Scan(
 		&postItemResponse.ID,
 		&postItemResponse.StorageID,
 		&postItemResponse.Name,
