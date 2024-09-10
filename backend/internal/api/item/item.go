@@ -66,7 +66,7 @@ func (s service) postItem() http.HandlerFunc {
 
 		item, err := s.itemStore.PostItem(requestBody)
 		if err != nil {
-			http.Error(w, "Failed to create User", http.StatusInternalServerError)
+			http.Error(w, "Failed to create Item", http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}
@@ -110,7 +110,7 @@ func (s service) patchItem() http.HandlerFunc {
 
 		item, err := s.itemStore.PatchItem(requestBody)
 		if err != nil {
-			http.Error(w, "Failed to create User", http.StatusInternalServerError)
+			http.Error(w, "Failed to patch Item", http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}

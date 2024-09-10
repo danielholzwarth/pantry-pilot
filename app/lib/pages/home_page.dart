@@ -18,13 +18,6 @@ class _HomePageState extends State<HomePage> {
   final StorageBloc storageBloc = StorageBloc();
   final ItemBloc itemBloc = ItemBloc();
 
-  TextEditingController itemNameController = TextEditingController();
-  TextEditingController itemQuantityController = TextEditingController();
-  TextEditingController itemTargetQuantityController = TextEditingController();
-  TextEditingController itemDetailsController = TextEditingController();
-  TextEditingController itemStorageController = TextEditingController();
-  TextEditingController storageNameController = TextEditingController();
-
   String itemBarcode = "not implemented yet...";
   bool isQRChecked = false;
   List<Storage> storages = [];
@@ -70,13 +63,7 @@ class _HomePageState extends State<HomePage> {
       bloc: storageBloc,
       listener: (context, state) {
         if (state is StoragesLoaded) {
-          clearController();
           storages = state.storages;
-        }
-
-        if (state is StoragePosted) {
-          clearController();
-          storages.add(state.storage);
         }
 
         if (state is StorageError) {
@@ -161,11 +148,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ],
                   ),
-                  content: isSelected[0] == true
-                      ? buildAddItem(
-                          itemNameController, itemQuantityController, itemTargetQuantityController, storages, itemStorageController, context)
-                      : buildAddStorage(storageNameController),
-                  actions: buildActions(context, isSelected[0]),
+                  content: isSelected[0] == true ? buildAddItem(storageBloc, storages) : buildAddStorage(storageBloc),
                 );
               },
             );
@@ -175,8 +158,165 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  List<Widget> buildActions(BuildContext context, bool isAddItem) {
-    return [
+  Widget buildAddStorage(StorageBloc storageBloc) {
+    StorageBloc storageBloc2 = StorageBloc();
+    TextEditingController nameController = TextEditingController();
+
+    return BlocConsumer(
+      bloc: storageBloc2,
+      listener: (context, state) {
+        if (state is StoragePosted) {
+          storageBloc.add(GetStorages());
+          nameController.clear();
+          Navigator.pop(context);
+        }
+
+        if (state is StorageError) {
+          displayMessageToUser(state.error, context);
+        }
+      },
+      builder: (context, state) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: "Name"),
+            ),
+            buildActions(
+              context,
+              () {
+                storageBloc2.add(PostStorage(name: nameController.text));
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  Widget buildAddItem(StorageBloc storageBloc, List<Storage> storages) {
+    ItemBloc itemBloc = ItemBloc();
+    TextEditingController nameController = TextEditingController();
+    TextEditingController quantityController = TextEditingController();
+    TextEditingController targetQuantityController = TextEditingController();
+    TextEditingController detailsController = TextEditingController();
+    TextEditingController storageController = TextEditingController();
+
+    List<DropdownMenuEntry> entries = [];
+
+    for (int i = 0; i < storages.length; i++) {
+      entries.add(DropdownMenuEntry(value: i, label: storages[i].name));
+    }
+
+    return BlocConsumer(
+      bloc: itemBloc,
+      listener: (context, state) {
+        if (state is ItemPosted) {
+          storageBloc.add(GetStorages());
+          nameController.clear();
+          quantityController.clear();
+          targetQuantityController.clear();
+          detailsController.clear();
+          storageController.clear();
+          Navigator.pop(context);
+        }
+
+        if (state is ItemError) {
+          displayMessageToUser(state.error, context);
+        }
+      },
+      builder: (context, state) {
+        return SizedBox(
+          height: 350,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: "Name"),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: 100,
+                    child: TextField(
+                      controller: quantityController,
+                      decoration: const InputDecoration(labelText: "Quantity"),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 100,
+                    child: TextField(
+                      controller: targetQuantityController,
+                      decoration: const InputDecoration(labelText: "Target"),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: 180,
+                    child: TextField(
+                      controller: detailsController,
+                      decoration: const InputDecoration(labelText: "Details"),
+                    ),
+                  ),
+                  StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                    return Row(
+                      children: [
+                        IconButton(
+                            onPressed: () {
+                              setState(() {
+                                isQRChecked = !isQRChecked;
+                              });
+                            },
+                            icon: const Icon(Icons.qr_code_scanner)),
+                        isQRChecked ? const Icon(Icons.check, color: Colors.green) : const Icon(Icons.close, color: Colors.red),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+              DropdownMenu(
+                dropdownMenuEntries: entries,
+                menuHeight: 200,
+                width: 250,
+                controller: storageController,
+              ),
+              buildActions(context, () {
+                int? quantity = int.tryParse(quantityController.text);
+                if (quantity == null) {
+                  displayMessageToUser("Please enter valid Quantity > 0", context);
+                  return;
+                }
+
+                itemBloc.add(PostItem(
+                  storageID: storages.firstWhere((element) => element.name == storageController.text).id,
+                  name: nameController.text,
+                  quantity: quantity,
+                  targetQuantity: int.tryParse(targetQuantityController.text) ?? 0,
+                  details: detailsController.text,
+                  barCode: itemBarcode,
+                ));
+              })
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+Widget buildActions(BuildContext context, Function()? onPressed) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
       TextButton(
         child: Text(
           "Cancel",
@@ -189,130 +329,14 @@ class _HomePageState extends State<HomePage> {
         },
       ),
       TextButton(
+        onPressed: onPressed,
         child: Text(
           "Add",
           style: TextStyle(
             color: Theme.of(context).colorScheme.inversePrimary,
           ),
         ),
-        onPressed: () {
-          if (isAddItem) {
-            int? quantity = int.tryParse(itemQuantityController.text);
-            if (quantity == null) {
-              displayMessageToUser("Please enter valid Quantity > 0", context);
-              return;
-            }
-
-            itemBloc.add(PostItem(
-              storageID: storages.firstWhere((element) => element.name == itemStorageController.text).id,
-              name: itemNameController.text,
-              quantity: quantity,
-              targetQuantity: int.tryParse(itemTargetQuantityController.text),
-              details: itemDetailsController.text,
-              barCode: itemBarcode, //GET REAL BARCODE
-            ));
-          } else {
-            storageBloc.add(PostStorage(name: storageNameController.text));
-          }
-          Navigator.of(context).pop();
-        },
-      ),
-    ];
-  }
-
-  void clearController() {
-    itemNameController.clear();
-    itemQuantityController.clear();
-    itemTargetQuantityController.clear();
-    itemDetailsController.clear();
-    itemStorageController.clear();
-    storageNameController.clear();
-  }
-
-  Column buildAddStorage(TextEditingController nameController) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        TextField(
-          controller: nameController,
-          decoration: const InputDecoration(labelText: "Name"),
-        ),
-      ],
-    );
-  }
-
-  Widget buildAddItem(TextEditingController nameController, TextEditingController actualController, TextEditingController targetController,
-      List<Storage> storages, TextEditingController storageController, BuildContext context) {
-    List<DropdownMenuEntry> entries = [];
-
-    for (int i = 0; i < storages.length; i++) {
-      entries.add(DropdownMenuEntry(value: i, label: storages[i].name));
-    }
-
-    return SizedBox(
-      height: 300,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          TextField(
-            controller: nameController,
-            decoration: const InputDecoration(labelText: "Name"),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: 100,
-                child: TextField(
-                  controller: actualController,
-                  decoration: const InputDecoration(labelText: "Quantity"),
-                  keyboardType: TextInputType.number,
-                ),
-              ),
-              SizedBox(
-                width: 100,
-                child: TextField(
-                  controller: targetController,
-                  decoration: const InputDecoration(labelText: "Target"),
-                  keyboardType: TextInputType.number,
-                ),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: 180,
-                child: TextField(
-                  controller: itemDetailsController,
-                  decoration: const InputDecoration(labelText: "Details"),
-                ),
-              ),
-              StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-                return Row(
-                  children: [
-                    IconButton(
-                        onPressed: () {
-                          setState(() {
-                            isQRChecked = !isQRChecked;
-                          });
-                        },
-                        icon: const Icon(Icons.qr_code_scanner)),
-                    isQRChecked ? const Icon(Icons.check, color: Colors.green) : const Icon(Icons.close, color: Colors.red),
-                  ],
-                );
-              }),
-            ],
-          ),
-          DropdownMenu(
-            dropdownMenuEntries: entries,
-            menuHeight: 200,
-            width: 250,
-            controller: storageController,
-          ),
-        ],
-      ),
-    );
-  }
+      )
+    ],
+  );
 }
