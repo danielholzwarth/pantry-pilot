@@ -16,11 +16,21 @@ type PostStorageRequest struct {
 	UserAccountID int    `json:"userAccountID"`
 }
 
-type PostStorageResponse struct {
-	ID            int       `json:"id"`
-	Name          string    `json:"name"`
-	UserAccountID int       `json:"userAccountID"`
-	UpdatedAt     time.Time `json:"updatedAt"`
-	CreatedAt     time.Time `json:"createdAt"`
-	Items         []Item    `json:"items"`
+type GetStoragesRequest struct {
+	UserAccountID int `json:"userAccountID"`
+}
+
+type GetStoragesResponse struct {
+	Storages []Storage `json:"storages"`
+}
+
+type PatchStorageRequest struct {
+	StorageID     int    `json:"storageID"`
+	Name          string `json:"name"`
+	UserAccountID int    `json:"userAccountID"`
+}
+
+type DeleteStorageRequest struct {
+	StorageID     int `json:"storageID"`
+	UserAccountID int `json:"userAccountID"`
 }

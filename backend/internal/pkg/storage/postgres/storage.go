@@ -1,11 +1,12 @@
 package postgres
 
 import (
+	"database/sql"
 	"errors"
 	"pantry-pilot/internal/types"
 )
 
-func (db DB) PostStorage(request types.PostStorageRequest) (types.PostStorageResponse, error) {
+func (db DB) PostStorage(request types.PostStorageRequest) error {
 	//Check if already exists
 	query := `
 		SELECT EXISTS(
@@ -18,36 +19,24 @@ func (db DB) PostStorage(request types.PostStorageRequest) (types.PostStorageRes
 	var exists bool
 	err := db.pool.QueryRow(query, request.Name, request.UserAccountID).Scan(&exists)
 	if err != nil {
-		return types.PostStorageResponse{}, err
+		return err
 	}
 
 	if exists {
-		return types.PostStorageResponse{}, errors.New("storage exists already")
+		return errors.New("storage exists already")
 	}
-
-	//Create Storage
-	var postStorageResponse types.PostStorageResponse
 
 	query = `
 		INSERT INTO storage (name, user_account_id, created_at, updated_at)
-		VALUES ($1, $2, Now(), Now())
-		RETURNING id, name, user_account_id, created_at, updated_at;
+		VALUES ($1, $2, Now(), Now());
 	`
 
-	err = db.pool.QueryRow(query, request.Name, request.UserAccountID).Scan(
-		&postStorageResponse.ID,
-		&postStorageResponse.Name,
-		&postStorageResponse.UserAccountID,
-		&postStorageResponse.CreatedAt,
-		&postStorageResponse.UpdatedAt)
-	if err != nil {
-		return types.PostStorageResponse{}, err
-	}
+	_, err = db.pool.Exec(query, request.Name, request.UserAccountID)
 
-	return postStorageResponse, nil
+	return err
 }
 
-func (db DB) GetStorages(userAccountID int) ([]types.Storage, error) {
+func (db DB) GetStorages(request types.GetStoragesRequest) ([]types.Storage, error) {
 	var storages []types.Storage
 
 	//Get all Storages
@@ -57,7 +46,7 @@ func (db DB) GetStorages(userAccountID int) ([]types.Storage, error) {
 		WHERE user_account_id = $1;
     `
 
-	rows, err := db.pool.Query(query, userAccountID)
+	rows, err := db.pool.Query(query, request.UserAccountID)
 	if err != nil {
 		return []types.Storage{}, err
 	}
@@ -101,4 +90,31 @@ func (db DB) GetStorages(userAccountID int) ([]types.Storage, error) {
 	}
 
 	return storages, err
+}
+
+func (db DB) PatchStorage(request types.PatchStorageRequest) error {
+	query := `
+		UPDATE storage
+		SET name = $1
+		WHERE id = $2 AND user_account_id = $3;
+	`
+
+	_, err := db.pool.Exec(query, request.Name, request.StorageID, request.UserAccountID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return errors.New("storage not found")
+	}
+
+	return err
+}
+
+func (db DB) DeleteStorage(request types.DeleteStorageRequest) error {
+	query := `
+		DELETE
+		FROM storage
+		WHERE id = $1 AND user_account_id = $2;
+	`
+
+	_, err := db.pool.Exec(query, request.StorageID, request.UserAccountID)
+
+	return err
 }

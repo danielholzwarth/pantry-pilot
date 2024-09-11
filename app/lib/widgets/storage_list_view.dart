@@ -63,7 +63,7 @@ class _StorageListViewState extends State<StorageListView> {
                     }
                   },
                   builder: (context, state) {
-                    if (state is StoragePatching || state is StoragePatched) {
+                    if (state is StoragePatching) {
                       return const Center(child: CircularProgressIndicator());
                     }
 
@@ -93,7 +93,7 @@ class _StorageListViewState extends State<StorageListView> {
                                     //Error gets handled from UI Below
                                   },
                                   builder: (context, state) {
-                                    if (state is StorageDeleting || state is StorageDeleted) {
+                                    if (state is StorageDeleting) {
                                       return const Center(child: CircularProgressIndicator());
                                     }
 
