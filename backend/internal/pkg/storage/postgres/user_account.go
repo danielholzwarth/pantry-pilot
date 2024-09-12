@@ -21,7 +21,7 @@ func (db DB) PostUserAccount(createUserRequest types.PostUserRequest) (types.Pos
 	query := `
         INSERT INTO user_account (email, password, created_at)
         VALUES ($1, $2, NOW())
-        RETURNING id, email, created_at;
+        RETURNING id, email;
     `
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(createUserRequest.Password), bcrypt.DefaultCost)
@@ -60,7 +60,7 @@ func (db DB) LoginUserAccount(loginUserRequest types.LoginUserRequest) (types.Lo
 	var hashedPassword []byte
 
 	query := `
-        SELECT *
+        SELECT id, email, password
         FROM user_account
         WHERE email = $1;
     `

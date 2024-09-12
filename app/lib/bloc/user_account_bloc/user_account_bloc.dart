@@ -1,6 +1,5 @@
 import 'package:app/api/user_account/user_account_service.dart';
 import 'package:app/helper/jwt_helper.dart';
-import 'package:app/models/user_account.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
@@ -29,12 +28,8 @@ class UserAccountBloc extends Bloc<UserAccountEvent, UserAccountState> {
       return;
     }
 
-    if (response.body != null) {
-      JWTHelper.saveJWTsFromResponse(response);
-
-      UserAccount userAccount = UserAccount.fromJson(response.body);
-      emit(UserAccountPosted(userAccount: userAccount));
-    }
+    JWTHelper.saveJWTsFromResponse(response);
+    emit(UserAccountPosted());
   }
 
   void _onLoginUserAccount(LoginUserAccount event, Emitter<UserAccountState> emit) async {
@@ -50,11 +45,7 @@ class UserAccountBloc extends Bloc<UserAccountEvent, UserAccountState> {
       return;
     }
 
-    if (response.body != null) {
-      JWTHelper.saveJWTsFromResponse(response);
-
-      UserAccount userAccount = UserAccount.fromJson(response.body);
-      emit(UserAccountLoggedIn(userAccount: userAccount));
-    }
+    JWTHelper.saveJWTsFromResponse(response);
+    emit(UserAccountLoggedIn());
   }
 }

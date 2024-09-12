@@ -7,23 +7,11 @@ class UserAccountInitial extends UserAccountState {}
 
 class UserAccountPosting extends UserAccountState {}
 
-class UserAccountPosted extends UserAccountState {
-  final UserAccount userAccount;
-
-  UserAccountPosted({
-    required this.userAccount,
-  });
-}
+class UserAccountPosted extends UserAccountState {}
 
 class UserAccountLoggingIn extends UserAccountState {}
 
-class UserAccountLoggedIn extends UserAccountState {
-  final UserAccount userAccount;
-
-  UserAccountLoggedIn({
-    required this.userAccount,
-  });
-}
+class UserAccountLoggedIn extends UserAccountState {}
 
 class UserAccountError extends UserAccountState {
   final String error;
