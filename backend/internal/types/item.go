@@ -20,16 +20,6 @@ type PostItemRequest struct {
 	Barcode        *string `json:"barcode"`
 }
 
-type PostItemResponse struct {
-	ID             int     `json:"id"`
-	StorageID      int     `json:"storageID"`
-	Name           string  `json:"name"`
-	Quantity       int     `json:"quantity"`
-	TargetQuantity *int    `json:"targetQuantity"`
-	Details        *string `json:"details"`
-	Barcode        *string `json:"barcode"`
-}
-
 type PatchItemRequest struct {
 	UserAccountID  int     `json:"userAccountID"`
 	ID             int     `json:"id"`
@@ -41,12 +31,7 @@ type PatchItemRequest struct {
 	Barcode        *string `json:"barcode"`
 }
 
-type PatchItemResponse struct {
+type DeleteItemRequest struct {
+	UserAccountID  int     `json:"userAccountID"`
 	ID             int     `json:"id"`
-	StorageID      int     `json:"storageID"`
-	Name           string  `json:"name"`
-	Quantity       int     `json:"quantity"`
-	TargetQuantity *int    `json:"targetQuantity"`
-	Details        *string `json:"details"`
-	Barcode        *string `json:"barcode"`
 }

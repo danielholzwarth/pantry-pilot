@@ -10,7 +10,7 @@ import (
 )
 
 type UserAccountStore interface {
-	PostUserAccount(createUserRequest types.PostUserRequest) (types.PostUserResponse, error)
+	PostUserAccount(postUserRequest types.PostUserRequest) (types.PostUserResponse, error)
 	LoginUserAccount(loginUserRequest types.LoginUserRequest) (types.LoginUserResponse, error)
 }
 
@@ -65,14 +65,14 @@ func (s service) postUserAccount() http.HandlerFunc {
 			return
 		}
 
-		jwtAccess, err := middleware.CreateAccessToken(user.ID, user.Email)
+		jwtAccess, err := middleware.CreateAccessToken(user.UserAccountID, user.Email)
 		if err != nil {
 			http.Error(w, "Failed to create Access Token", http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}
 
-		jwtRefresh, err := middleware.CreateRefreshToken(user.ID, user.Email)
+		jwtRefresh, err := middleware.CreateRefreshToken(user.UserAccountID, user.Email)
 		if err != nil {
 			http.Error(w, "Failed to create Refresh Token", http.StatusInternalServerError)
 			println(err.Error())
@@ -82,15 +82,7 @@ func (s service) postUserAccount() http.HandlerFunc {
 		w.Header().Add("storage-jwt-access", jwtAccess)
 		w.Header().Add("storage-jwt-refresh", jwtRefresh)
 
-		response, err := json.Marshal(user)
-		if err != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			println(err.Error())
-			return
-		}
-
 		w.WriteHeader(http.StatusCreated)
-		w.Write(response)
 	}
 }
 
@@ -124,14 +116,14 @@ func (s service) loginUserAccount() http.HandlerFunc {
 			return
 		}
 
-		jwtAccess, err := middleware.CreateAccessToken(user.ID, user.Email)
+		jwtAccess, err := middleware.CreateAccessToken(user.UserAccountID, user.Email)
 		if err != nil {
 			http.Error(w, "Failed to create Access Token", http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}
 
-		jwtRefresh, err := middleware.CreateRefreshToken(user.ID, user.Email)
+		jwtRefresh, err := middleware.CreateRefreshToken(user.UserAccountID, user.Email)
 		if err != nil {
 			http.Error(w, "Failed to create Refresh Token", http.StatusInternalServerError)
 			println(err.Error())
@@ -141,14 +133,6 @@ func (s service) loginUserAccount() http.HandlerFunc {
 		w.Header().Add("storage-jwt-access", jwtAccess)
 		w.Header().Add("storage-jwt-refresh", jwtRefresh)
 
-		response, err := json.Marshal(user)
-		if err != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			println(err.Error())
-			return
-		}
-
 		w.WriteHeader(http.StatusOK)
-		w.Write(response)
 	}
 }

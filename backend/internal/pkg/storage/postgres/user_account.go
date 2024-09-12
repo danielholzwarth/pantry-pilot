@@ -9,26 +9,14 @@ import (
 )
 
 func (db DB) PostUserAccount(createUserRequest types.PostUserRequest) (types.PostUserResponse, error) {
-	emailAlreadyExists, err := GetEmailAlreadyExists(db, createUserRequest.Email)
+	exists, err := GetEmailAlreadyExists(db, createUserRequest.Email)
 	if err != nil {
 		return types.PostUserResponse{}, err
 	}
 
-	if emailAlreadyExists {
+	if exists {
 		return types.PostUserResponse{}, errors.New("account with this email already exists")
 	}
-
-	tx, err := db.pool.Begin()
-	if err != nil {
-		return types.PostUserResponse{}, err
-	}
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-			return
-		}
-		err = tx.Commit()
-	}()
 
 	query := `
         INSERT INTO user_account (email, password, created_at)
@@ -43,7 +31,7 @@ func (db DB) PostUserAccount(createUserRequest types.PostUserRequest) (types.Pos
 
 	var postUserResponse types.PostUserResponse
 
-	err = tx.QueryRow(query, createUserRequest.Email, hashedPassword).Scan(&postUserResponse.ID, &postUserResponse.Email, &postUserResponse.CreatedAt)
+	err = db.pool.QueryRow(query, createUserRequest.Email, hashedPassword).Scan(&postUserResponse.UserAccountID, &postUserResponse.Email)
 	if err != nil {
 		return types.PostUserResponse{}, err
 	}
@@ -78,11 +66,11 @@ func (db DB) LoginUserAccount(loginUserRequest types.LoginUserRequest) (types.Lo
     `
 
 	err := db.pool.QueryRow(query, loginUserRequest.Email).Scan(
-		&loginUserResponse.ID,
+		&loginUserResponse.UserAccountID,
 		&loginUserResponse.Email,
 		&hashedPassword,
-		&loginUserResponse.CreatedAt,
 	)
+
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return types.LoginUserResponse{}, errors.New("user not found")

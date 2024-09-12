@@ -1,11 +1,12 @@
 package postgres
 
 import (
+	"database/sql"
 	"errors"
 	"pantry-pilot/internal/types"
 )
 
-func (db DB) PostItem(request types.PostItemRequest) (types.PostItemResponse, error) {
+func (db DB) PostItem(request types.PostItemRequest) error {
 	//Check if item already exists
 	query := `
 		SELECT EXISTS(
@@ -19,38 +20,47 @@ func (db DB) PostItem(request types.PostItemRequest) (types.PostItemResponse, er
 	var exists bool
 	err := db.pool.QueryRow(query, request.Name, request.StorageID, request.UserAccountID).Scan(&exists)
 	if err != nil {
-		return types.PostItemResponse{}, err
+		return err
 	}
 
 	if exists {
-		return types.PostItemResponse{}, errors.New("item exists already")
+		return errors.New("item exists already")
 	}
-
-	//Create Item
-	var postItemResponse types.PostItemResponse
 
 	query = `
 		INSERT INTO item (storage_id, name, quantity, target_quantity, details, barcode)
-		VALUES ($1, $2, $3, $4, $5, $6)
-		RETURNING id, storage_id, name, quantity, target_quantity, details, barcode;
+		VALUES ($1, $2, $3, $4, $5, $6);
 	`
 
-	err = db.pool.QueryRow(query, request.StorageID, request.Name, request.Quantity, request.TargetQuantity, request.Details, request.Barcode).Scan(
-		&postItemResponse.ID,
-		&postItemResponse.StorageID,
-		&postItemResponse.Name,
-		&postItemResponse.Quantity,
-		&postItemResponse.TargetQuantity,
-		&postItemResponse.Details,
-		&postItemResponse.Barcode,
-	)
-	if err != nil {
-		return types.PostItemResponse{}, err
-	}
-
-	return postItemResponse, nil
+	_, err = db.pool.Exec(query, request.StorageID, request.Name, request.Quantity, request.TargetQuantity, request.Details, request.Barcode)
+	return err
 }
 
-func (db DB) PatchItem(request types.PatchItemRequest) (types.PatchItemResponse, error) {
-	return types.PatchItemResponse{}, nil
+func (db DB) PatchItem(request types.PatchItemRequest) error {
+	query := `
+		UPDATE item i
+		JOIN storage s ON s.id = i.storage_id 
+		SET i.name = $1, i.quantity = $2, i.target_quantity = $3, i.details = $4, i.barcode = $5
+		WHERE i.id = $6 AND i.storage_id = $7 AND s.user_Account_id = $8;
+	`
+
+	_, err := db.pool.Exec(query, request.Name, request.Quantity, request.TargetQuantity, request.Details, request.Barcode, request.ID, request.StorageID, request.UserAccountID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return errors.New("item not found")
+	}
+
+	return err
+}
+
+func (db DB) DeleteItem(request types.DeleteItemRequest) error {
+	query := `
+		DELETE
+		FROM item i
+		JOIN storage s ON s.id = i.storage_id
+		WHERE i.id = $1 AND s.user_account_id = $2;
+	`
+
+	_, err := db.pool.Exec(query, request.ID, request.UserAccountID)
+
+	return err
 }

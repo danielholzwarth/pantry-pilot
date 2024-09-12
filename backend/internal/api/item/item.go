@@ -4,13 +4,15 @@ import (
 	"encoding/json"
 	"net/http"
 	"pantry-pilot/internal/types"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 )
 
 type ItemStore interface {
-	PostItem(request types.PostItemRequest) (types.PostItemResponse, error)
-	PatchItem(request types.PatchItemRequest) (types.PatchItemResponse, error)
+	PostItem(request types.PostItemRequest) error
+	PatchItem(request types.PatchItemRequest) error
+	DeleteItem(request types.DeleteItemRequest) error
 }
 
 type service struct {
@@ -27,6 +29,7 @@ func NewService(itemStore ItemStore) http.Handler {
 
 	r.Post("/", s.postItem())
 	r.Patch("/", s.patchItem())
+	r.Delete("/{itemID}", s.deleteItem())
 
 	return s
 }
@@ -64,22 +67,20 @@ func (s service) postItem() http.HandlerFunc {
 			return
 		}
 
-		item, err := s.itemStore.PostItem(requestBody)
+		if requestBody.Quantity < 0 {
+			http.Error(w, "Wrong input for quantity. Must be integer equal or greater than 0", http.StatusBadRequest)
+			println("Wrong input for quantity. Must be integer equal or greater than 0")
+			return
+		}
+
+		err := s.itemStore.PostItem(requestBody)
 		if err != nil {
 			http.Error(w, "Failed to create Item", http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}
 
-		response, err := json.Marshal(item)
-		if err != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			println(err.Error())
-			return
-		}
-
 		w.WriteHeader(http.StatusCreated)
-		w.Write(response)
 	}
 }
 
@@ -106,23 +107,57 @@ func (s service) patchItem() http.HandlerFunc {
 			return
 		}
 
-		//TODO Get entire object and patch db entry
+		if requestBody.Name == "" {
+			http.Error(w, "Name must not be empty", http.StatusBadRequest)
+			println("Name must not be empty")
+			return
+		}
 
-		item, err := s.itemStore.PatchItem(requestBody)
+		if requestBody.Quantity < 0 {
+			http.Error(w, "Wrong input for quantity. Must be integer equal or greater than 0", http.StatusBadRequest)
+			println("Wrong input for quantity. Must be integer equal or greater than 0")
+			return
+		}
+
+		err := s.itemStore.PatchItem(requestBody)
 		if err != nil {
 			http.Error(w, "Failed to patch Item", http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}
 
-		response, err := json.Marshal(item)
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func (s service) deleteItem() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		claims, ok := r.Context().Value(types.RequestorContextKey).(types.Claims)
+		if !ok {
+			http.Error(w, "Invalid requestor ID", http.StatusInternalServerError)
+			return
+		}
+
+		var request types.DeleteItemRequest
+		request.UserAccountID = claims.UserAccountID
+
+		itemIDValue := chi.URLParam(r, "itemID")
+		itemID, err := strconv.Atoi(itemIDValue)
+		if err != nil || itemID <= 0 {
+			http.Error(w, "Wrong input for itemID. Must be integer greater than 0.", http.StatusBadRequest)
+			println(err.Error())
+			return
+		}
+
+		request.ID = itemID
+
+		err = s.itemStore.DeleteItem(request)
 		if err != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			http.Error(w, "Failed to delete Item", http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write(response)
 	}
 }

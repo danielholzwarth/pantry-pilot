@@ -15,9 +15,8 @@ type PostUserRequest struct {
 }
 
 type PostUserResponse struct {
-	ID        int       `json:"id"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"createdAt"`
+	UserAccountID int    `json:"userAccountID"`
+	Email         string `json:"email"`
 }
 
 type LoginUserRequest struct {
@@ -26,7 +25,6 @@ type LoginUserRequest struct {
 }
 
 type LoginUserResponse struct {
-	ID        int       `json:"id"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"createdAt"`
+	UserAccountID int    `json:"userAccountID"`
+	Email         string `json:"email"`
 }
