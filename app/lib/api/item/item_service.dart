@@ -18,6 +18,12 @@ abstract class ItemService extends ChopperService {
     @Body() Map<String, dynamic> body,
   );
 
+  @Delete(path: '/{itemID}')
+  Future<Response> deleteItem(
+    @Header('storage-jwt') String storageJWT,
+    @Path('itemID') int itemID,
+  );
+
   static ItemService create() {
     final client = ChopperClient(
         baseUrl: Uri.parse(SettingsHelper.getCurrentURL()),

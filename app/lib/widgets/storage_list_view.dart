@@ -9,11 +9,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class StorageListView extends StatefulWidget {
   final Storage storage;
   final StorageBloc homeStorageBloc;
+  final List<Storage> storages;
 
   const StorageListView({
     super.key,
     required this.storage,
     required this.homeStorageBloc,
+    required this.storages,
   });
 
   @override
@@ -23,14 +25,6 @@ class StorageListView extends StatefulWidget {
 class _StorageListViewState extends State<StorageListView> {
   TextEditingController nameController = TextEditingController();
   StorageBloc storageBloc = StorageBloc();
-
-  void onDeleteItem(BuildContext context, int index) {
-    setState(() {
-      widget.storage.items.remove(widget.storage.items[index]);
-    });
-  }
-
-  void onEditItem(BuildContext context) {}
 
   @override
   void initState() {
@@ -162,8 +156,8 @@ class _StorageListViewState extends State<StorageListView> {
               itemBuilder: (context, index) {
                 return StorageTile(
                   item: widget.storage.items[index],
-                  onDelete: (p0) => onDeleteItem(context, index),
-                  onEdit: (p0) => onEditItem(context),
+                  homeStorageBloc: widget.homeStorageBloc,
+                  storages: widget.storages,
                 );
               },
             ),

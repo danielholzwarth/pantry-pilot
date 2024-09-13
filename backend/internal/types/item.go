@@ -5,9 +5,9 @@ type Item struct {
 	StorageID      int     `json:"storageID"`
 	Name           string  `json:"name"`
 	Quantity       int     `json:"quantity"`
-	TargetQuantity *int    `json:"targetQuantity"`
-	Details        *string `json:"details"`
-	Barcode        *string `json:"barcode"`
+	TargetQuantity int    `json:"targetQuantity"`
+	Details        string `json:"details"`
+	Barcode        string `json:"barcode"`
 }
 
 type PostItemRequest struct {
@@ -15,9 +15,9 @@ type PostItemRequest struct {
 	StorageID      int     `json:"storageID"`
 	Name           string  `json:"name"`
 	Quantity       int     `json:"quantity"`
-	TargetQuantity *int    `json:"targetQuantity"`
-	Details        *string `json:"details"`
-	Barcode        *string `json:"barcode"`
+	TargetQuantity int    `json:"targetQuantity"`
+	Details        string `json:"details"`
+	Barcode        string `json:"barcode"`
 }
 
 type PatchItemRequest struct {
@@ -26,9 +26,9 @@ type PatchItemRequest struct {
 	StorageID      int     `json:"storageID"`
 	Name           string  `json:"name"`
 	Quantity       int     `json:"quantity"`
-	TargetQuantity *int    `json:"targetQuantity"`
-	Details        *string `json:"details"`
-	Barcode        *string `json:"barcode"`
+	TargetQuantity int    `json:"targetQuantity"`
+	Details        string `json:"details"`
+	Barcode        string `json:"barcode"`
 }
 
 type DeleteItemRequest struct {

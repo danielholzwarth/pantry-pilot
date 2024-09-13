@@ -12,6 +12,7 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
   ItemBloc() : super(ItemInitial()) {
     on<PostItem>(_onPostItem);
     on<PatchItem>(_onPatchItem);
+    on<DeleteItem>(_onDeleteItem);
   }
 
   void _onPostItem(PostItem event, Emitter<ItemState> emit) async {
@@ -52,6 +53,11 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
 
     final response = await _itemService.patchItem(currentJWT, event.itemID, {
       "name": event.name,
+      "storageID": event.storageID,
+      'quantity': event.quantity,
+      'targetQuantity': event.targetQuantity,
+      'details': event.details,
+      'barCode': event.barCode,
     });
 
     if (!response.isSuccessful) {
@@ -61,5 +67,25 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
 
     JWTHelper.saveJWTsFromResponse(response);
     emit(ItemPatched());
+  }
+
+  void _onDeleteItem(DeleteItem event, Emitter<ItemState> emit) async {
+    emit(ItemDeleting());
+
+    String? currentJWT = JWTHelper.getActiveJWT();
+    if (currentJWT == null) {
+      debugPrint("No active JWT found!");
+      return;
+    }
+
+    final response = await _itemService.deleteItem(currentJWT, event.itemID);
+
+    if (!response.isSuccessful) {
+      emit(ItemError(error: response.error.toString()));
+      return;
+    }
+
+    JWTHelper.saveJWTsFromResponse(response);
+    emit(ItemDeleted());
   }
 }

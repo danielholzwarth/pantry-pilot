@@ -28,7 +28,7 @@ func NewService(itemStore ItemStore) http.Handler {
 	}
 
 	r.Post("/", s.postItem())
-	r.Patch("/", s.patchItem())
+	r.Patch("/{itemID}", s.patchItem())
 	r.Delete("/{itemID}", s.deleteItem())
 
 	return s
@@ -92,34 +92,44 @@ func (s service) patchItem() http.HandlerFunc {
 			return
 		}
 
-		var requestBody types.PatchItemRequest
-		requestBody.UserAccountID = claims.UserAccountID
+		var request types.PatchItemRequest
+		request.UserAccountID = claims.UserAccountID
+
+		itemIDValue := chi.URLParam(r, "itemID")
+		itemID, err := strconv.Atoi(itemIDValue)
+		if err != nil || itemID <= 0 {
+			http.Error(w, "Wrong input for itemID. Must be integer greater than 0.", http.StatusBadRequest)
+			println(err.Error())
+			return
+		}
+
+		request.ID = itemID
 
 		decoder := json.NewDecoder(r.Body)
-		if err := decoder.Decode(&requestBody); err != nil {
+		if err := decoder.Decode(&request); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		if requestBody.StorageID <= 0 {
+		if request.StorageID <= 0 {
 			http.Error(w, "Wrong input for storageID. Must be integer greater than 0", http.StatusBadRequest)
 			println("Wrong input for storageID. Must be integer greater than 0")
 			return
 		}
 
-		if requestBody.Name == "" {
+		if request.Name == "" {
 			http.Error(w, "Name must not be empty", http.StatusBadRequest)
 			println("Name must not be empty")
 			return
 		}
 
-		if requestBody.Quantity < 0 {
+		if request.Quantity < 0 {
 			http.Error(w, "Wrong input for quantity. Must be integer equal or greater than 0", http.StatusBadRequest)
 			println("Wrong input for quantity. Must be integer equal or greater than 0")
 			return
 		}
 
-		err := s.itemStore.PatchItem(requestBody)
+		err = s.itemStore.PatchItem(request)
 		if err != nil {
 			http.Error(w, "Failed to patch Item", http.StatusInternalServerError)
 			println(err.Error())

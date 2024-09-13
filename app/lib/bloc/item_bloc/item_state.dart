@@ -13,6 +13,10 @@ class ItemPatching extends ItemState {}
 
 class ItemPatched extends ItemState {}
 
+class ItemDeleting extends ItemState {}
+
+class ItemDeleted extends ItemState {}
+
 class ItemError extends ItemState {
   final String error;
 

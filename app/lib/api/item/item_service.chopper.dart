@@ -57,4 +57,22 @@ final class _$ItemService extends ItemService {
     );
     return client.send<dynamic, dynamic>($request);
   }
+
+  @override
+  Future<Response<dynamic>> deleteItem(
+    String storageJWT,
+    int itemID,
+  ) {
+    final Uri $url = Uri.parse('/items/${itemID}');
+    final Map<String, String> $headers = {
+      'storage-jwt': storageJWT,
+    };
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      headers: $headers,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
 }

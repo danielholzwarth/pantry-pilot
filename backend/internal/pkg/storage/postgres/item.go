@@ -38,10 +38,10 @@ func (db DB) PostItem(request types.PostItemRequest) error {
 
 func (db DB) PatchItem(request types.PatchItemRequest) error {
 	query := `
-		UPDATE item i
-		JOIN storage s ON s.id = i.storage_id 
-		SET i.name = $1, i.quantity = $2, i.target_quantity = $3, i.details = $4, i.barcode = $5
-		WHERE i.id = $6 AND i.storage_id = $7 AND s.user_Account_id = $8;
+		UPDATE item
+		SET name = $1, quantity = $2, target_quantity = $3, details = $4, barcode = $5
+		FROM storage s
+		WHERE s.id = storage_id AND item.id = $6 AND item.storage_id = $7 AND s.user_Account_id = $8;
 	`
 
 	_, err := db.pool.Exec(query, request.Name, request.Quantity, request.TargetQuantity, request.Details, request.Barcode, request.ID, request.StorageID, request.UserAccountID)
@@ -54,10 +54,11 @@ func (db DB) PatchItem(request types.PatchItemRequest) error {
 
 func (db DB) DeleteItem(request types.DeleteItemRequest) error {
 	query := `
-		DELETE
-		FROM item i
-		JOIN storage s ON s.id = i.storage_id
-		WHERE i.id = $1 AND s.user_account_id = $2;
+		DELETE FROM item
+		USING storage
+		WHERE item.id = $1
+		AND item.storage_id = storage.id
+		AND storage.user_account_id = $2;
 	`
 
 	_, err := db.pool.Exec(query, request.ID, request.UserAccountID)

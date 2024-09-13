@@ -18,7 +18,6 @@ class _HomePageState extends State<HomePage> {
   final StorageBloc storageBloc = StorageBloc();
   final ItemBloc itemBloc = ItemBloc();
 
-  String itemBarcode = "not implemented yet...";
   bool isQRChecked = false;
   List<Storage> storages = [];
 
@@ -83,7 +82,7 @@ class _HomePageState extends State<HomePage> {
               for (Storage storage in storages)
                 Column(
                   children: [
-                    StorageListView(storage: storage, homeStorageBloc: storageBloc),
+                    StorageListView(storage: storage, homeStorageBloc: storageBloc, storages: storages),
                   ],
                 )
             ],
@@ -178,6 +177,10 @@ class _HomePageState extends State<HomePage> {
         }
       },
       builder: (context, state) {
+        if (state is StoragePosting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -292,19 +295,33 @@ class _HomePageState extends State<HomePage> {
                 controller: storageController,
               ),
               buildActions(context, () {
+                if (nameController.text.isEmpty) {
+                  displayMessageToUser("Name must not be empty!", context);
+                  return;
+                }
+
                 int? quantity = int.tryParse(quantityController.text);
                 if (quantity == null) {
-                  displayMessageToUser("Please enter valid Quantity > 0", context);
+                  displayMessageToUser("Please enter valid Quantity > 0!", context);
+                  return;
+                }
+
+                int storageID = storages
+                    .firstWhere((element) => element.name == storageController.text,
+                        orElse: () => Storage(id: -1, name: "", items: [], updatedAt: DateTime.now()))
+                    .id;
+                if (storageID <= 0) {
+                  displayMessageToUser("Please enter valid Storage!", context);
                   return;
                 }
 
                 itemBloc.add(PostItem(
-                  storageID: storages.firstWhere((element) => element.name == storageController.text).id,
+                  storageID: storageID,
                   name: nameController.text,
                   quantity: quantity,
                   targetQuantity: int.tryParse(targetQuantityController.text) ?? 0,
                   details: detailsController.text,
-                  barCode: itemBarcode,
+                  barCode: "itemBarcode",
                 ));
               })
             ],
