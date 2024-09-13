@@ -147,6 +147,7 @@ class _StorageTileState extends State<StorageTile> {
 
             itemBloc.add(PatchItem(
                 itemID: widget.item.id,
+                oldStorageID: widget.item.storageID,
                 storageID: widget.item.storageID,
                 name: widget.item.name,
                 quantity: quantity,
@@ -360,6 +361,7 @@ class _StorageTileState extends State<StorageTile> {
 
                   itemBloc.add(PatchItem(
                     itemID: widget.item.id,
+                    oldStorageID: widget.item.storageID,
                     storageID: storageID,
                     name: nameController.text,
                     quantity: quantity,

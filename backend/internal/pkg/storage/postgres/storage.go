@@ -67,7 +67,8 @@ func (db DB) GetStorages(request types.GetStoragesRequest) ([]types.Storage, err
 	query = `
 		SELECT *
 		FROM item
-		WHERE storage_id = $1;
+		WHERE storage_id = $1
+		ORDER BY name ASC;
 	`
 
 	for i := range storages {

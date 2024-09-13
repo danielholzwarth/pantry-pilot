@@ -3,7 +3,6 @@ class Item {
   String name;
   int quantity;
   int storageID;
-
   int targetQuantity;
   String details;
   String barCode;

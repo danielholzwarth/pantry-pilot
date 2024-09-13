@@ -117,6 +117,12 @@ func (s service) patchItem() http.HandlerFunc {
 			return
 		}
 
+		if request.OldStorageID <= 0 {
+			http.Error(w, "Wrong input for oldStorageID. Must be integer greater than 0", http.StatusBadRequest)
+			println("Wrong input for oldStorageID. Must be integer greater than 0")
+			return
+		}
+
 		if request.Name == "" {
 			http.Error(w, "Name must not be empty", http.StatusBadRequest)
 			println("Name must not be empty")

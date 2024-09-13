@@ -23,6 +23,7 @@ class PostItem extends ItemEvent {
 
 class PatchItem extends ItemEvent {
   final int itemID;
+  final int oldStorageID;
   final int storageID;
   final String name;
   final int quantity;
@@ -32,6 +33,7 @@ class PatchItem extends ItemEvent {
 
   PatchItem({
     required this.itemID,
+    required this.oldStorageID,
     required this.storageID,
     required this.name,
     required this.quantity,

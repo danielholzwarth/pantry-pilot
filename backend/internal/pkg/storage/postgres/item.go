@@ -39,12 +39,12 @@ func (db DB) PostItem(request types.PostItemRequest) error {
 func (db DB) PatchItem(request types.PatchItemRequest) error {
 	query := `
 		UPDATE item
-		SET name = $1, quantity = $2, target_quantity = $3, details = $4, barcode = $5
+		SET name = $1, quantity = $2, target_quantity = $3, details = $4, barcode = $5, storage_id = $6
 		FROM storage s
-		WHERE s.id = storage_id AND item.id = $6 AND item.storage_id = $7 AND s.user_Account_id = $8;
+		WHERE s.id = storage_id AND item.id = $7 AND item.storage_id = $8  AND s.user_Account_id = $9;
 	`
 
-	_, err := db.pool.Exec(query, request.Name, request.Quantity, request.TargetQuantity, request.Details, request.Barcode, request.ID, request.StorageID, request.UserAccountID)
+	_, err := db.pool.Exec(query, request.Name, request.Quantity, request.TargetQuantity, request.Details, request.Barcode, request.StorageID, request.ID, request.OldStorageID, request.UserAccountID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return errors.New("item not found")
 	}

@@ -84,7 +84,8 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     StorageListView(storage: storage, homeStorageBloc: storageBloc, storages: storages),
                   ],
-                )
+                ),
+              const SizedBox(height: 80),
             ],
           ),
         );

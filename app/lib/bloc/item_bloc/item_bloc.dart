@@ -53,6 +53,7 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
 
     final response = await _itemService.patchItem(currentJWT, event.itemID, {
       "name": event.name,
+      "oldStorageID": event.oldStorageID,
       "storageID": event.storageID,
       'quantity': event.quantity,
       'targetQuantity': event.targetQuantity,
