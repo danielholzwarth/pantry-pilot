@@ -1,5 +1,6 @@
 import 'package:app/bloc/storage_bloc/storage_bloc.dart';
 import 'package:app/helper/helper.dart';
+import 'package:app/helper/text_highlighter.dart';
 import 'package:app/models/storage.dart';
 import 'package:app/widgets/dialogs/storage_confirm_delete_dialog.dart';
 import 'package:app/widgets/storage_tile.dart';
@@ -10,12 +11,16 @@ class StorageListView extends StatefulWidget {
   final Storage storage;
   final StorageBloc homeStorageBloc;
   final List<Storage> storages;
+  final bool isSearch;
+  final String keyword;
 
   const StorageListView({
     super.key,
     required this.storage,
     required this.homeStorageBloc,
     required this.storages,
+    this.isSearch = false,
+    this.keyword = "",
   });
 
   @override
@@ -138,13 +143,15 @@ class _StorageListViewState extends State<StorageListView> {
                 );
               },
             ),
-            child: Text(
-              widget.storage.name,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            child: widget.isSearch
+                ? TextHiglighter.highlightText(context, widget.storage.name, widget.keyword, 20)
+                : Text(
+                    widget.storage.name,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
           ),
           children: [
             ListView.builder(
@@ -156,6 +163,8 @@ class _StorageListViewState extends State<StorageListView> {
                   item: widget.storage.items[index],
                   homeStorageBloc: widget.homeStorageBloc,
                   storages: widget.storages,
+                  isSearch: widget.isSearch,
+                  keyword: widget.keyword,
                 );
               },
             ),

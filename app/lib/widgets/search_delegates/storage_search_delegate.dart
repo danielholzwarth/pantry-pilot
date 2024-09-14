@@ -16,6 +16,16 @@ class StorageSearchDelegate extends SearchDelegate {
   }
 
   @override
+  ThemeData appBarTheme(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return theme.copyWith(
+      appBarTheme: theme.appBarTheme.copyWith(
+        backgroundColor: Theme.of(context).colorScheme.background,
+      ),
+    );
+  }
+
+  @override
   List<Widget>? buildActions(BuildContext context) {
     return [
       IconButton(
@@ -67,7 +77,13 @@ class StorageSearchDelegate extends SearchDelegate {
                       for (Storage storage in state.storages)
                         Column(
                           children: [
-                            StorageListView(storage: storage, homeStorageBloc: storageBloc, storages: state.storages),
+                            StorageListView(
+                              storage: storage,
+                              homeStorageBloc: storageBloc,
+                              storages: state.storages,
+                              isSearch: true,
+                              keyword: query,
+                            ),
                           ],
                         ),
                       const SizedBox(height: 80),

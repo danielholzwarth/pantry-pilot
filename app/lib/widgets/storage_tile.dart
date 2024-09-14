@@ -1,6 +1,7 @@
 import 'package:app/bloc/item_bloc/item_bloc.dart';
 import 'package:app/bloc/storage_bloc/storage_bloc.dart';
 import 'package:app/helper/helper.dart';
+import 'package:app/helper/text_highlighter.dart';
 import 'package:app/models/item.dart';
 import 'package:app/models/storage.dart';
 import 'package:app/widgets/dialogs/storage_confirm_delete_dialog.dart';
@@ -12,12 +13,16 @@ class StorageTile extends StatefulWidget {
   final Item item;
   final StorageBloc homeStorageBloc;
   final List<Storage> storages;
+  final bool isSearch;
+  final String keyword;
 
   const StorageTile({
     super.key,
     required this.item,
     required this.homeStorageBloc,
     required this.storages,
+    this.isSearch = false,
+    this.keyword = "",
   });
 
   @override
@@ -78,29 +83,36 @@ class _StorageTileState extends State<StorageTile> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              widget.item.name,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-            Text(
-              widget.item.details,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w300,
-              ),
-            ),
+            widget.isSearch
+                ? TextHiglighter.highlightText(context, widget.item.name, widget.keyword, 16)
+                : Text(
+                    widget.item.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+            widget.isSearch
+                ? TextHiglighter.highlightText(context, widget.item.details, widget.keyword, 12)
+                : Text(
+                    widget.item.details,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.inversePrimary,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
           ],
         ),
-        trailing: Text(
-          "${widget.item.quantity.toString()}/${widget.item.targetQuantity.toString()}",
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
+        trailing: widget.isSearch
+            ? TextHiglighter.highlightText(context, "${widget.item.quantity.toString()}/${widget.item.targetQuantity.toString()}", widget.keyword, 16)
+            : Text(
+                "${widget.item.quantity.toString()}/${widget.item.targetQuantity.toString()}",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
       ),
     );
   }
