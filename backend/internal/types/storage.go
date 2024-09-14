@@ -20,8 +20,9 @@ type GetStoragesRequest struct {
 	UserAccountID int `json:"userAccountID"`
 }
 
-type GetStoragesResponse struct {
-	Storages []Storage `json:"storages"`
+type GetStoragesSearchRequest struct {
+	UserAccountID int    `json:"userAccountID"`
+	Keyword       string `json:"keyword"`
 }
 
 type PatchStorageRequest struct {

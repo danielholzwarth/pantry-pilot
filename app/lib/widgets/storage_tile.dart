@@ -75,12 +75,24 @@ class _StorageTileState extends State<StorageTile> {
             );
           },
         ),
-        title: Text(
-          widget.item.name,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w400,
-          ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.item.name,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            Text(
+              widget.item.details,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w300,
+              ),
+            ),
+          ],
         ),
         trailing: Text(
           "${widget.item.quantity.toString()}/${widget.item.targetQuantity.toString()}",

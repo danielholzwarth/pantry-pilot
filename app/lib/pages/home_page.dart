@@ -2,6 +2,7 @@ import 'package:app/bloc/item_bloc/item_bloc.dart';
 import 'package:app/bloc/storage_bloc/storage_bloc.dart';
 import 'package:app/helper/helper.dart';
 import 'package:app/models/storage.dart';
+import 'package:app/widgets/search_delegates/storage_search_delegate.dart';
 import 'package:app/widgets/storage_drawer.dart';
 import 'package:app/widgets/storage_list_view.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +51,10 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.only(right: 8),
           child: IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () {},
+            onPressed: () async {
+              await showSearch(context: context, delegate: StorageSearchDelegate());
+              storageBloc.add(GetStorages());
+            },
           ),
         ),
       ],

@@ -15,6 +15,16 @@ class StoragesLoaded extends StorageState {
   });
 }
 
+class StoragesLoadingSearch extends StorageState {}
+
+class StoragesLoadedSearch extends StorageState {
+  final List<Storage> storages;
+
+  StoragesLoadedSearch({
+    required this.storages,
+  });
+}
+
 class StoragePosting extends StorageState {}
 
 class StoragePosted extends StorageState {}

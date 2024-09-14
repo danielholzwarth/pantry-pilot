@@ -12,6 +12,7 @@ import (
 type StorageStore interface {
 	PostStorage(request types.PostStorageRequest) error
 	GetStorages(request types.GetStoragesRequest) ([]types.Storage, error)
+	GetStoragesSearch(request types.GetStoragesSearchRequest) ([]types.Storage, error)
 	PatchStorage(request types.PatchStorageRequest) error
 	DeleteStorage(request types.DeleteStorageRequest) error
 }
@@ -30,6 +31,7 @@ func NewService(storageStore StorageStore) http.Handler {
 
 	r.Post("/", s.postStorage())
 	r.Get("/", s.getStorages())
+	r.Get("/{keyword}", s.getStoragesSearch())
 	r.Patch("/{storageID}", s.patchStorage())
 	r.Delete("/{storageID}", s.deleteStorage())
 
@@ -88,6 +90,43 @@ func (s service) getStorages() http.HandlerFunc {
 		data, err := s.storageStore.GetStorages(request)
 		if err != nil {
 			http.Error(w, "Failed to get Storages", http.StatusInternalServerError)
+			println(err.Error())
+			return
+		}
+
+		if data == nil {
+			w.WriteHeader(http.StatusOK)
+			w.Write(nil)
+			return
+		}
+
+		response, err := json.Marshal(data)
+		if err != nil {
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			println(err.Error())
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write(response)
+	}
+}
+
+func (s service) getStoragesSearch() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		claims, ok := r.Context().Value(types.RequestorContextKey).(types.Claims)
+		if !ok {
+			http.Error(w, "Invalid requestor ID", http.StatusInternalServerError)
+			return
+		}
+
+		var request types.GetStoragesSearchRequest
+		request.UserAccountID = claims.UserAccountID
+		request.Keyword = chi.URLParam(r, "keyword")
+
+		data, err := s.storageStore.GetStoragesSearch(request)
+		if err != nil {
+			http.Error(w, "Failed to get Storages with Search", http.StatusInternalServerError)
 			println(err.Error())
 			return
 		}

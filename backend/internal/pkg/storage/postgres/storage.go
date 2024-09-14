@@ -93,6 +93,72 @@ func (db DB) GetStorages(request types.GetStoragesRequest) ([]types.Storage, err
 	return storages, err
 }
 
+func (db DB) GetStoragesSearch(request types.GetStoragesSearchRequest) ([]types.Storage, error) {
+	var storages []types.Storage
+
+	//Get all Storages
+	query := `
+        SELECT *
+        FROM storage
+		WHERE user_account_id = $1;
+    `
+
+	rows, err := db.pool.Query(query, request.UserAccountID)
+	if err != nil {
+		return []types.Storage{}, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var storage types.Storage
+
+		err := rows.Scan(&storage.ID, &storage.Name, &storage.UserAccountID, &storage.UpdatedAt, &storage.CreatedAt)
+		if err != nil {
+			return []types.Storage{}, err
+		}
+
+		storages = append(storages, storage)
+	}
+
+	//Get all Items for each Storage with matching Keyword
+	query = `
+		SELECT *
+		FROM item
+		WHERE storage_id = $1 AND (LOWER(name) LIKE '%' || LOWER($2) || '%' OR LOWER(details) LIKE '%' || LOWER($2) || '%')
+		ORDER BY name ASC;
+	`
+
+	var filledStorages []types.Storage
+
+	println("Keyword: ", request.Keyword)
+
+	for i := range storages {
+		rows, err := db.pool.Query(query, storages[i].ID, request.Keyword)
+		if err != nil {
+			return []types.Storage{}, err
+		}
+
+		for rows.Next() {
+			var item types.Item
+
+			err := rows.Scan(&item.ID, &item.StorageID, &item.Name, &item.Quantity, &item.TargetQuantity, &item.Details, &item.Barcode)
+			if err != nil {
+				return []types.Storage{}, err
+			}
+
+			storages[i].Items = append(storages[i].Items, item)
+		}
+		rows.Close()
+
+		//Remove all Storages with no Items
+		if len(storages[i].Items) > 0 {
+			filledStorages = append(filledStorages, storages[i])
+		}
+	}
+
+	return filledStorages, nil
+}
+
 func (db DB) PatchStorage(request types.PatchStorageRequest) error {
 	query := `
 		UPDATE storage

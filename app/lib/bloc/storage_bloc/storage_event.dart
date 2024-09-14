@@ -13,6 +13,14 @@ class PostStorage extends StorageEvent {
 
 class GetStorages extends StorageEvent {}
 
+class GetStoragesSearch extends StorageEvent {
+  final String keyword;
+
+  GetStoragesSearch({
+    required this.keyword,
+  });
+}
+
 class PatchStorage extends StorageEvent {
   final int storageID;
   final String name;

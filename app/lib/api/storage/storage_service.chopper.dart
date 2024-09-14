@@ -53,6 +53,24 @@ final class _$StorageService extends StorageService {
   }
 
   @override
+  Future<Response<dynamic>> getStoragesSearch(
+    String storageJWT,
+    String keyword,
+  ) {
+    final Uri $url = Uri.parse('/storages/${keyword}');
+    final Map<String, String> $headers = {
+      'storage-jwt': storageJWT,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      headers: $headers,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
   Future<Response<dynamic>> patchStorage(
     String storageJWT,
     int itemID,

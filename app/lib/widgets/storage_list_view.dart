@@ -83,8 +83,6 @@ class _StorageListViewState extends State<StorageListView> {
                                       Navigator.pop(context);
                                       Navigator.pop(context);
                                     }
-
-                                    //Error gets handled from UI Below
                                   },
                                   builder: (context, state) {
                                     if (state is StorageDeleting) {

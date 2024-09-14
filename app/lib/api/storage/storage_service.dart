@@ -16,6 +16,12 @@ abstract class StorageService extends ChopperService {
     @Header('storage-jwt') String storageJWT,
   );
 
+  @Get(path: '/{keyword}')
+  Future<Response> getStoragesSearch(
+    @Header('storage-jwt') String storageJWT,
+    @Path('keyword') String keyword,
+  );
+
   @Patch(path: '/{storageID}')
   Future<Response> patchStorage(
     @Header('storage-jwt') String storageJWT,

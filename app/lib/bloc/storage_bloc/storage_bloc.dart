@@ -13,6 +13,7 @@ class StorageBloc extends Bloc<StorageEvent, StorageState> {
   StorageBloc() : super(StorageInitial()) {
     on<PostStorage>(_onPostStorage);
     on<GetStorages>(_onGetStorages);
+    on<GetStoragesSearch>(_onGetStoragesSearch);
     on<PatchStorage>(_onPatchStorage);
     on<DeleteStorage>(_onDeleteStorage);
   }
@@ -64,6 +65,36 @@ class StorageBloc extends Bloc<StorageEvent, StorageState> {
       }
 
       emit(StoragesLoaded(storages: storages));
+    }
+  }
+
+  void _onGetStoragesSearch(GetStoragesSearch event, Emitter<StorageState> emit) async {
+    emit(StoragesLoadingSearch());
+
+    String? currentJWT = JWTHelper.getActiveJWT();
+    if (currentJWT == null) {
+      debugPrint("No active JWT found!");
+      return;
+    }
+
+    final response = await _storageService.getStoragesSearch(currentJWT, event.keyword);
+
+    if (!response.isSuccessful) {
+      emit(StorageError(error: response.error.toString()));
+      return;
+    }
+
+    if (response.body != null) {
+      JWTHelper.saveJWTsFromResponse(response);
+
+      List<Storage> storages = [];
+      if (response.bodyString.isNotEmpty) {
+        storages = List<Storage>.from(response.body.map((json) {
+          return Storage.fromJson(json);
+        }));
+      }
+
+      emit(StoragesLoadedSearch(storages: storages));
     }
   }
 
